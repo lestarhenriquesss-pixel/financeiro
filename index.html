@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="language" content="pt-BR">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        http-equiv="content-type"
+        content="text/html; charset=UTF-8"
+    >
+
+    <meta
+        http-equiv="content-language"
+        content="pt-BR"
+    >
+
+    <meta
+        http-equiv="X-UA-Compatible"
+        content="ie=edge"
+    >
+
+    <title>Controle Financeiro $</title>
+
+    <link
+        rel="shortcut icon"
+        href="./assets/favicon.png"
+        type="image/x-icon"
+    >
+
+    <link rel="stylesheet" href="./styles/main.css">
+    <link rel="stylesheet" href="./styles/responsivity.css">
+    <link rel="stylesheet" href="./styles/index.css">
+    <link rel="stylesheet" href="./styles/modal.css">
+    <link rel="stylesheet" href="./styles/form-modal.css">
+    <link rel="stylesheet" href="./styles/menu-float-button.css">
+    <link rel="stylesheet" href="./styles/scrollbar.css">
+    <link rel="stylesheet" href="./styles/toggle-switch.css">
+    <link rel="stylesheet" href="./styles/switch-month.css">
+    <link rel="stylesheet" href="./styles/toast.css">
+    <link rel="stylesheet" href="./styles/animations.css">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;400;500;700&display=swap"
+        rel="stylesheet"
+    >
+</head>
+
+<body>
+
+    <script type="module">
+        import {
+            auth
+        } from "./scripts/firebase.js"
+
+        import {
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = "./login.html"
+            }
+        })
+    </script>
+
+    <section id="user-info-bar">
+
+        <div class="user-info-content">
+
+            <strong id="profile-name-display">
+                Usuário
+            </strong>
+
+            <small id="profile-email-display">
+                carregando...
+            </small>
+
+            <small id="active-mode-display">
+                Modo individual
+            </small>
+
+        </div>
+
+        <button
+            type="button"
+            id="toggle-group-mode-button"
+            onclick="Groups.toggleMode()"
+        >
+            Usar grupo
+        </button>
+
+    </section>
+
+    <header>
+
+        <h1 class="app-logo">
+
+            <span class="logo-white">
+                Controle
+            </span>
+
+            <span class="logo-green">
+                .
+            </span>
+
+            <span class="logo-white">
+                Financeiro
+            </span>
+
+            <span class="logo-green">
+                $
+            </span>
+
+        </h1>
+
+    </header>
+
+    <main class="container">
+
+        <section id="container-calendar-and-opening-balance">
+
+            <div
+                onclick="OpeningBalanceModal.open()"
+                class="mini-card opening-balance"
+            >
+                <h3>
+                    <img
+                        src="./assets/money.svg"
+                        alt="Carteira"
+                    >
+
+                    <span>Saldo inicial</span>
+                </h3>
+
+                <p id="openingBalanceDisplay">
+                    R$ 0,00
+                </p>
+            </div>
+
+            <h3 id="year-calendar"></h3>
+
+            <div id="switch-month">
+
+                <button
+                    id="switch-previous-month-button"
+                    onclick="Calendar.switchMonth('previous')"
+                    class="switch-month-button"
+                    title="Mês anterior"
+                >
+                    <img
+                        src="./assets/arrow.svg"
+                        alt=""
+                    >
+                </button>
+
+                <p id="previous-month"></p>
+
+                <p id="current-month"></p>
+
+                <p id="next-month"></p>
+
+                <button
+                    id="switch-next-month-button"
+                    onclick="Calendar.switchMonth('next')"
+                    class="switch-month-button"
+                    title="Próximo mês"
+                >
+                    <img
+                        src="./assets/arrow.svg"
+                        alt=""
+                    >
+                </button>
+
+            </div>
+
+        </section>
+
+        <section id="balance">
+
+            <div class="card">
+
+                <h3>
+                    <span>Entradas</span>
+
+                    <img
+                        src="./assets/income.svg"
+                        alt="Entradas"
+                    >
+                </h3>
+
+                <p id="incomeDisplay">
+                    R$ 0,00
+                </p>
+
+            </div>
+
+            <div class="card">
+
+                <h3>
+                    <span>Saídas</span>
+
+                    <img
+                        src="./assets/expense.svg"
+                        alt="Saídas"
+                    >
+                </h3>
+
+                <p id="expenseDisplay">
+                    R$ 0,00
+                </p>
+
+            </div>
+
+            <div class="card total" id="total-month-card">
+
+                <h3>
+                    <span>Resultado do mês</span>
+
+                    <img
+                        src="./assets/total.svg"
+                        alt="Resultado"
+                    >
+                </h3>
+
+                <p id="totalMonthDisplay">
+                    R$ 0,00
+                </p>
+
+            </div>
+
+            <div class="card total" id="total-balance-card">
+
+                <h3>
+                    <span>Saldo total</span>
+
+                    <img
+                        src="./assets/wallet.svg"
+                        alt="Saldo total"
+                    >
+                </h3>
+
+                <p id="totalBalanceDisplay">
+                    R$ 0,00
+                </p>
+
+            </div>
+
+        </section>
+
+        <section id="month-visual-summary">
+
+            <h2>Resumo visual do mês</h2>
+
+            <div class="pie-chart-wrapper">
+
+                <div id="month-pie-chart"></div>
+
+                <div class="pie-chart-legend">
+
+                    <div>
+                        <span class="legend-income"></span>
+                        Entradas
+                    </div>
+
+                    <div>
+                        <span class="legend-expense"></span>
+                        Saídas
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="summary-share">
+                <span>
+                    Sobra por integrante
+                </span>
+
+                <strong id="summary-share-per-member">
+                    --
+                </strong>
+            </div>
+
+        </section>
+
+        <section id="category-dashboard">
+
+            <h2>Resumo por categoria</h2>
+
+            <div id="category-dashboard-list"></div>
+
+        </section>
+
+        <section id="transaction">
+
+            <table id="data-table">
+
+                <thead>
+                    <tr>
+                        <th>Descrição</th>
+                        <th>Valor</th>
+                        <th>Data</th>
+                        <th></th>
+                    </tr>
+                </thead>
+
+                <tbody></tbody>
+
+            </table>
+
+        </section>
+
+    </main>
+
+    <div
+        id="create-transaction-modal"
+        class="modal-overlay"
+    >
+        <div class="modal">
+            <div id="form">
+
+                <h2 class="modal-title">
+                    Nova Transação
+                </h2>
+
+                <p class="modal-description">
+                    Registre uma entrada ou saída para o mês selecionado.
+                </p>
+
+                <form onsubmit="Form.submit(event)">
+
+                    <div class="input-group">
+                        <label for="description">
+                            Descrição
+                        </label>
+
+                        <input
+                            type="text"
+                            id="description"
+                            name="description"
+                            placeholder="Descrição"
+                        >
+                    </div>
+
+                    <div class="input-group">
+                        <label for="amount">
+                            Valor
+                        </label>
+
+                        <input
+                            type="number"
+                            id="amount"
+                            name="amount"
+                            placeholder="0,00"
+                            step="0.01"
+                        >
+                    </div>
+
+                    <div class="input-group">
+                        <label for="category">
+                            Categoria
+                        </label>
+
+                        <select id="category">
+                            <option value="">Categoria</option>
+                            <option value="Casa">Casa</option>
+                            <option value="Lazer">Lazer</option>
+                            <option value="Comida">Comida</option>
+                            <option value="Transporte">Transporte</option>
+                            <option value="Trabalho">Trabalho</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="date">
+                            Data
+                        </label>
+
+                        <input
+                            type="date"
+                            id="date"
+                            name="date"
+                        >
+                    </div>
+
+                    <div class="input-group recurring-group">
+                        <label class="recurring-label">
+                            <input
+                                type="checkbox"
+                                id="recurring"
+                            >
+
+                            <span>Transação recorrente</span>
+                        </label>
+                    </div>
+
+                    <div class="modal-actions">
+                        <a
+                            onclick="CreateTransactionModal.close()"
+                            class="modal-cancel-button"
+                        >
+                            Cancelar
+                        </a>
+
+                        <button
+                            type="submit"
+                            class="modal-primary-button"
+                        >
+                            Salvar
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <div
+        id="update-transaction-modal"
+        class="modal-overlay"
+    >
+        <div class="modal">
+            <div id="form">
+
+                <h2 class="modal-title">
+                    Editar Transação
+                </h2>
+
+                <p class="modal-description">
+                    Ajuste as informações do lançamento selecionado.
+                </p>
+
+                <form
+                    id="update-transaction-form"
+                    data-transaction-id=""
+                    onsubmit="UpdateTransactionForm.submit(event)"
+                >
+
+                    <div class="input-group">
+                        <label for="update-description">
+                            Descrição
+                        </label>
+
+                        <input
+                            type="text"
+                            id="update-description"
+                            placeholder="Descrição"
+                        >
+                    </div>
+
+                    <div class="input-group">
+                        <label for="update-amount">
+                            Valor
+                        </label>
+
+                        <input
+                            type="number"
+                            id="update-amount"
+                            placeholder="0,00"
+                            step="0.01"
+                        >
+                    </div>
+
+                    <div class="input-group">
+                        <label for="update-category">
+                            Categoria
+                        </label>
+
+                        <select id="update-category">
+                            <option value="">Categoria</option>
+                            <option value="Casa">Casa</option>
+                            <option value="Lazer">Lazer</option>
+                            <option value="Comida">Comida</option>
+                            <option value="Transporte">Transporte</option>
+                            <option value="Trabalho">Trabalho</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="update-date">
+                            Data
+                        </label>
+
+                        <input
+                            type="date"
+                            id="update-date"
+                        >
+                    </div>
+
+                    <div class="input-group recurring-group">
+                        <label class="recurring-label">
+                            <input
+                                type="checkbox"
+                                id="update-recurring"
+                            >
+
+                            <span>Transação recorrente</span>
+                        </label>
+                    </div>
+
+                    <div class="modal-actions">
+                        <a
+                            onclick="UpdateTransactionModal.close()"
+                            class="modal-cancel-button"
+                        >
+                            Cancelar
+                        </a>
+
+                        <button
+                            type="submit"
+                            class="modal-primary-button"
+                        >
+                            Atualizar
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <div
+        id="opening-balance-modal"
+        class="modal-overlay"
+    >
+        <div class="modal">
+            <div id="form">
+
+                <h2 class="modal-title">
+                    Saldo Inicial
+                </h2>
+
+                <p class="modal-description">
+                    Informe o saldo inicial deste mês. Caso não edite, ele herdará o saldo final do mês anterior.
+                </p>
+
+                <form>
+
+                    <div class="input-group">
+                        <label for="opening-balance-input">
+                            Valor
+                        </label>
+
+                        <input
+                            type="number"
+                            id="opening-balance-input"
+                            placeholder="0,00"
+                        >
+                    </div>
+
+                    <div class="modal-actions">
+                        <a
+                            onclick="OpeningBalanceModal.close()"
+                            class="modal-cancel-button"
+                        >
+                            Cancelar
+                        </a>
+
+                        <button
+                            type="button"
+                            id="save-opening-balance-button"
+                            class="modal-primary-button"
+                        >
+                            Salvar
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <div
+        id="category-modal"
+        class="modal-overlay"
+    >
+        <div class="modal">
+            <div id="form">
+
+                <h2 class="modal-title">
+                    Nova Categoria
+                </h2>
+
+                <p class="modal-description">
+                    Crie uma categoria para organizar melhor seus lançamentos.
+                </p>
+
+                <form onsubmit="CreateCategoryForm.submit(event)">
+
+                    <div class="input-group">
+                        <label for="create-category">
+                            Nome da categoria
+                        </label>
+
+                        <input
+                            type="text"
+                            id="create-category"
+                            placeholder="Categoria"
+                        >
+                    </div>
+
+                    <div class="modal-actions">
+                        <a
+                            onclick="CategoryModal.close()"
+                            class="modal-cancel-button"
+                        >
+                            Cancelar
+                        </a>
+
+                        <button
+                            type="submit"
+                            class="modal-primary-button"
+                        >
+                            Salvar
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <div
+        id="profile-modal"
+        class="modal-overlay"
+    >
+        <div class="modal">
+            <div id="form">
+
+                <h2 class="modal-title">
+                    Editar Perfil
+                </h2>
+
+                <p class="modal-description">
+                    Atualize seu nome de exibição no aplicativo.
+                </p>
+
+                <div class="input-group">
+                    <label for="profile-name-input">
+                        Nome
+                    </label>
+
+                    <input
+                        type="text"
+                        id="profile-name-input"
+                        placeholder="Seu nome"
+                    >
+                </div>
+
+                <p id="profile-email-display"></p>
+
+                <div class="modal-actions">
+                    <a
+                        onclick="ProfileModal.close()"
+                        class="modal-cancel-button"
+                    >
+                        Cancelar
+                    </a>
+
+                    <button
+                        type="button"
+                        onclick="Profile.save()"
+                        class="modal-primary-button"
+                    >
+                        Salvar
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">
+        <div class="img">
+            <h1>×</h1>
+        </div>
+
+        <div class="description">
+            Preencha todos os campos
+        </div>
+    </div>
+
+    <div
+        id="group-modal"
+        class="modal-overlay"
+    >
+        <div class="modal group-modal-content">
+
+            <div id="form">
+
+                <h2>Grupo familiar</h2>
+
+                <p class="group-modal-description">
+                    Crie ou edite um grupo para controlar contas em conjunto.
+                </p>
+
+                <div class="input-group">
+                    <label for="group-name-input">
+                        Nome do grupo
+                    </label>
+
+                    <input
+                        type="text"
+                        id="group-name-input"
+                        placeholder="Ex: Casa, Família, Casal"
+                    >
+                </div>
+
+                <div class="input-group">
+                    <label for="group-user-email">
+                        Convidar integrante
+                    </label>
+
+                    <input
+                        type="email"
+                        id="group-user-email"
+                        placeholder="email@exemplo.com"
+                    >
+                </div>
+
+                <div class="group-members-box">
+                    <strong>Integrantes</strong>
+
+                    <p id="group-members-list">
+                        Nenhum grupo ativo
+                    </p>
+                </div>
+
+                <div class="group-modal-actions">
+
+                    <button
+                        type="button"
+                        onclick="Groups.createGroup()"
+                        class="group-primary-button"
+                    >
+                        Criar grupo
+                    </button>
+
+                    <button
+                        type="button"
+                        onclick="Groups.saveGroupName()"
+                        class="group-secondary-button"
+                    >
+                        Salvar nome
+                    </button>
+
+                    <button
+                        type="button"
+                        onclick="Groups.exitGroup()"
+                        class="group-danger-button"
+                    >
+                        Sair do grupo
+                    </button>
+
+                    <button
+                        type="button"
+                        onclick="GroupModal.close()"
+                        class="group-cancel-button"
+                    >
+                        Fechar
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <button
+        onclick="MenuButton.toggle()"
+        class="menu-button"
+        title="Menu"
+    >
+        <img
+            src="./assets/menu.svg"
+            alt="Menu"
+            width="32"
+        >
+    </button>
+
+    <button
+        onclick="CreateTransactionModal.open()"
+        class="add-transaction-button menu-options"
+        title="Adicionar transação"
+    >
+        <img
+            src="./assets/transfer.svg"
+            alt="Adicionar"
+            width="16"
+        >
+    </button>
+
+    <button
+        onclick="CategoryModal.open()"
+        class="add-category-button menu-options"
+        title="Adicionar categoria"
+    >
+        <img
+            src="./assets/category.svg"
+            alt="Categoria"
+            width="16"
+        >
+    </button>
+
+    <button
+        onclick="GroupModal.open()"
+        class="group-button menu-options"
+        title="Criar grupo"
+    >
+        <img
+            src="./assets/users.svg"
+            alt="Grupo"
+            width="16"
+        >
+    </button>
+
+    <button
+        onclick="ProfileModal.open()"
+        class="profile-button menu-options"
+        title="Configurações"
+    >
+        <img
+            src="./assets/settings.svg"
+            alt="Configurações"
+            width="16"
+        >
+    </button>
+
+    <button
+        onclick="logout()"
+        class="logout-button menu-options"
+        title="Sair"
+    >
+        <img
+            src="./assets/logout.svg"
+            alt="Sair"
+            width="16"
+        >
+    </button>
+
+    <footer>
+        <small>
+            Controle Financeiro $
+        </small>
+    </footer>
+
+    <script type="module" src="./scripts/firebase.js"></script>
+    <script type="module" src="./scripts/firestore.js"></script>
+    <script type="module" src="./scripts/transactions.js"></script>
+    <script type="module" src="./scripts/openingBalance.js"></script>
+    <script type="module" src="./scripts/profile.js"></script>
+    <script type="module" src="./scripts/groups.js"></script>
+
+    <script src="./scripts/utils.js"></script>
+    <script src="./scripts/calendar.js"></script>
+    <script src="./scripts/dom.js"></script>
+    <script src="./scripts/modals.js"></script>
+    <script src="./scripts/categories.js"></script>
+    <script src="./scripts/forms.js"></script>
+
+    <script type="module" src="./scripts/app.js"></script>
+
+    <script type="module">
+        import {
+            auth
+        } from "./scripts/firebase.js"
+
+        import {
+            signOut
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"
+
+        async function logout() {
+            await signOut(auth)
+
+            window.location.href = "./login.html"
+        }
+
+        window.logout = logout
+    </script>
+
+    <script type="module">
+        import {
+            OpeningBalance
+        } from "./scripts/openingBalance.js"
+
+        const saveButton =
+            document.querySelector("#save-opening-balance-button")
+
+        saveButton.addEventListener("click", async () => {
+            const value =
+                document.querySelector("#opening-balance-input").value
+
+            await OpeningBalance.save(value)
+        })
+    </script>
+
+</body>
+
+</html>
